@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  mongo:
+    restart: always
+    image: mongo
+    volumes:
+      - project-db-volume:/db
+    ports:
+      - "27017:27017"
+  backend:
+    build: ./backend/
+    tty: true
+    env_file:
+      - ./backend/.env
+    volumes:
+      - project-log-volume:/var/project/logs
+    environment:
+      WAIT_HOSTS: mongo:27017
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      - mongo
+    links:
+      - mongo
+  nginx:
+    build: ./nginx
+    tty: true
+    links:
+      - backend
+    ports:
+      - 8080:8080
+volumes:
+  project-db-volume:
+  project-log-volume:
